@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1923">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SMP Pro">
+<meta name="description" content="Store Maintenance Pro - QSR Field Maintenance App">
+<title>Store Maintenance Pro</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+  ============================================================ */
+  :root {
+    --bg-void:     #0a0f16;
+    --bg-base:     #0f1923;
+    --bg-card:     #162030;
+    --bg-card2:    #1c2a3d;
+    --bg-hover:    #1e3250;
+    --border:      #233044;
+    --border-glow: #2e4a6e;
+
+    --accent:      #00d4ff;
+    --accent-dim:  #00a8cc;
+    --accent-glow: rgba(0,212,255,0.15);
+    --amber:       #f59e0b;
+    --amber-dim:   rgba(245,158,11,0.15);
+    --red:         #ef4444;
+    --red-dim:     rgba(239,68,68,0.15);
+    --green:       #22c55e;
+    --green-dim:   rgba(34,197,94,0.12);
+    --purple:      #a855f7;
+    --purple-dim:  rgba(168,85,247,0.12);
+
+    --text-1:  #e8f0fe;
+    --text-2:  #8fa3c0;
+    --text-3:  #4f6a87;
+
+    --radius:  12px;
+    --radius-lg: 18px;
+    --radius-sm: 8px;
+
+    --font-main: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --nav-h: 60px;
+    --top-h: 56px;
+  }
+
+  /* ============================================================
+     RESET & BASE
+  ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { height: 100%; }
+  body {
+    font-family: var(--font-main);
+    background: var(--bg-void);
+    color: var(--text-1);
+    height: 100%;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============================================================
+     LAYOUT SHELL
+  ============================================================ */
+  #app {
+    display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh;
+    overflow: hidden;
+  }
+  #topbar {
+    height: var(--top-h);
+    background: var(--bg-base);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+  }
+  #topbar .logo {
+    font-size: 16px; font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+    flex: 1;
+  }
+  #topbar .logo span { color: var(--text-2); font-weight: 400; }
+  #topbar .store-badge {
+    background: var(--bg-card2);
+    border: 1px solid var(--border-glow);
+    color: var(--accent);
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 140px; overflow: hidden; text-overflow: ellipsis;
+  }
+  #topbar .icon-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-2); font-size: 16px;
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  #topbar .icon-btn:hover { background: var(--bg-hover); color: var(--accent); }
+
+  #content {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding-bottom: calc(var(--nav-h) + 16px);
+    scroll-behavior: smooth;
+  }
+  #content::-webkit-scrollbar { width: 3px; }
+  #content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  #navbar {
+    height: var(--nav-h);
+    background: var(--bg-base);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-shrink: 0;
+    position: relative; z-index: 100;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px; cursor: pointer;
+    color: var(--text-3); transition: color 0.2s;
+    font-size: 10px; font-weight: 500;
+    position: relative;
+  }
+  .nav-item svg { width: 20px; height: 20px; transition: transform 0.2s; }
+  .nav-item.active { color: var(--accent); }
+  .nav-item.active svg { transform: scale(1.1); }
+  .nav-item.active::after {
+    content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+    height: 2px; background: var(--accent); border-radius: 2px 2px 0 0;
+  }
+
+  /* ============================================================
+     PAGES
+  ============================================================ */
+  .page { display: none; padding: 14px; }
+  .page.active { display: block; }
+
+  /* ============================================================
+     TYPOGRAPHY UTILITIES
+  ============================================================ */
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--text-3); text-transform: uppercase;
+    margin: 20px 0 8px;
+  }
+  .section-label:first-child { margin-top: 4px; }
+
+  /* ============================================================
+     CARDS
+  ============================================================ */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .card:hover { border-color: var(--border-glow); }
+
+  /* ============================================================
+     DASHBOARD
+  ============================================================ */
+  .dash-header {
+    background: linear-gradient(135deg, var(--bg-card2), var(--bg-card));
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dash-header::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: var(--accent-glow);
+    border-radius: 50%;
+    filter: blur(30px);
+  }
+  .dash-header .greeting {
+    font-size: 12px; color: var(--text-2); margin-bottom: 4px;
+  }
+  .dash-header .name {
+    font-size: 20px; font-weight: 800; color: var(--text-1);
+    letter-spacing: -0.3px;
+  }
+  .dash-header .name span { color: var(--accent); }
+  .dash-header .role {
+    font-size: 11px; color: var(--accent); margin-top: 2px;
+    font-weight: 600; letter-spacing: 0.5px;
+  }
+  .dash-header .date-str {
+    font-size: 11px; color: var(--text-3); margin-top: 6px;
+    font-family: var(--font-mono);
+  }
+
+  .kpi-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 14px;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    position: relative; overflow: hidden;
+    cursor: pointer;
+  }
+  .kpi-card .kpi-val {
+    font-size: 28px; font-weight: 800;
+    font-family: var(--font-mono);
+    line-height: 1;
+  }
+  .kpi-card .kpi-lbl {
+    font-size: 10px; color: var(--text-2);
+    margin-top: 4px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .kpi-card .kpi-icon {
+    position: absolute; right: 10px; top: 10px;
+    font-size: 22px; opacity: 0.25;
+  }
+  .kpi-card.accent { border-color: var(--accent); }
+  .kpi-card.accent .kpi-val { color: var(--accent); }
+  .kpi-card.amber { border-color: var(--amber); }
+  .kpi-card.amber .kpi-val { color: var(--amber); }
+  .kpi-card.red { border-color: var(--red); }
+  .kpi-card.red .kpi-val { color: var(--red); }
+  .kpi-card.green { border-color: var(--green); }
+  .kpi-card.green .kpi-val { color: var(--green); }
+
+  /* Store health row */
+  .store-health-row {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .store-health-row:hover { border-color: var(--border-glow); background: var(--bg-hover); }
+  .store-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .store-health-row .s-name {
+    flex: 1; font-size: 13px; font-weight: 600; color: var(--text-1);
+  }
+  .store-health-row .s-id {
+    font-size: 10px; color: var(--text-3); font-family: var(--font-mono);
+  }
+  .health-bar-wrap { width: 60px; }
+  .health-bar {
+    height: 4px; background: var(--border);
+    border-radius: 4px; overflow: hidden;
+  }
+  .health-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .health-pct { font-size: 10px; color: var(--text-2); font-family: var(--font-mono); text-align: right; margin-top: 2px; }
+
+  /* Today's tasks */
+  .task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--border-glow);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; font-size: 12px;
+    transition: all 0.2s;
+  }
+  .task-check.done { background: var(--green); border-color: var(--green); }
+  .task-item .t-info { flex: 1; }
+  .task-item .t-name { font-size: 13px; font-weight: 500; color: var(--text-1); }
+  .task-item .t-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .task-item .t-badge {
+    font-size: 10px; font-weight: 600; padding: 3px 7px;
+    border-radius: 20px;
+  }
+  .badge-crit { background: var(--red-dim); color: var(--red); }
+  .badge-warn { background: var(--amber-dim); color: var(--amber); }
+  .badge-ok   { background: var(--green-dim); color: var(--green); }
+  .badge-info { background: var(--accent-glow); color: var(--accent); }
+  .badge-vendor { background: var(--purple-dim); color: var(--purple); }
+
+  /* ============================================================
+     CHECKLIST PAGE
+  ============================================================ */
+  .store-selector {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding-bottom: 8px; margin-bottom: 14px;
+    scrollbar-width: none;
+  }
+  .store-selector::-webkit-scrollbar { display: none; }
+  .store-chip {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    color: var(--text-2); white-space: nowrap;
+  }
+  .store-chip.active {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .checklist-category {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .cat-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer; transition: background 0.2s;
+    user-select: none;
+  }
+  .cat-header:hover { background: var(--bg-hover); }
+  .cat-icon { font-size: 18px; }
+  .cat-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--text-1); }
+  .cat-progress {
+    font-size: 11px; color: var(--text-3);
+    font-family: var(--font-mono);
+  }
+  .cat-arrow { color: var(--text-3); transition: transform 0.2s; font-size: 12px; }
+  .cat-header.open .cat-arrow { transform: rotate(90deg); }
+  .cat-body { display: none; border-top: 1px solid var(--border); }
+  .cat-body.open { display: block; }
+
+  .check-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .check-row:last-child { border-bottom: none; }
+  .check-row:hover { background: var(--bg-hover); }
+  .check-row .c-label { flex: 1; }
+  .check-row .c-name { font-size: 13px; color: var(--text-1); font-weight: 500; }
+  .check-row .c-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+  .status-btns {
+    display: flex; gap: 5px; flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .status-btn {
+    width: 28px; height: 28px; border-radius: 7px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .status-btn:hover { border-color: var(--border-glow); transform: scale(1.1); }
+  .status-btn.sel-ok      { background: var(--green-dim);  border-color: var(--green);  }
+  .status-btn.sel-fail    { background: var(--red-dim);    border-color: var(--red);    }
+  .status-btn.sel-obs     { background: var(--amber-dim);  border-color: var(--amber);  }
+  .status-btn.sel-vendor  { background: var(--purple-dim); border-color: var(--purple); }
+  .status-btn.sel-crit    { background: var(--red-dim);    border-color: var(--red); animation: pulse-red 1s infinite; }
+
+  @keyframes pulse-red {
+    0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    50%      { box-shadow: 0 0 0 4px rgba(239,68,68,0); }
+  }
+
+  .cat-progress-bar {
+    height: 3px; background: var(--border); margin: 0 14px 10px;
+    border-radius: 3px; overflow: hidden;
+  }
+  .cat-progress-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.4s; }
+
+  /* ============================================================
+     BREAKDOWN MODE
+  ============================================================ */
+  .breakdown-search {
+    display: flex; gap: 8px; margin-bottom: 14px;
+  }
+  .bd-input {
+    flex: 1; background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px; color: var(--text-1);
+    font-size: 14px; font-family: var(--font-main);
+    outline: none;
+  }
+  .bd-input:focus { border-color: var(--accent); }
+  .bd-input::placeholder { color: var(--text-3); }
+  .bd-btn {
+    background: var(--accent);
+    border: none; border-radius: var(--radius-sm);
+    padding: 10px 16px; color: #000;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    font-family: var(--font-main);
+  }
+
+  .fault-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px; margin-bottom: 10px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .fault-card:hover { border-color: var(--accent); background: var(--bg-hover); }
+  .fault-card .fc-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 6px; }
+  .fault-card .fc-eq { font-size: 11px; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  .fault-card .fc-steps { list-style: none; }
+  .fault-card .fc-steps li {
+    font-size: 12px; color: var(--text-2);
+    padding: 4px 0; border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .fault-card .fc-steps li:last-child { border: none; }
+  .step-num {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent); flex-shrink: 0; font-weight: 700;
+    min-width: 20px;
+  }
+
+  /* AI Assist panel */
+  .ai-panel {
+    background: linear-gradient(135deg, var(--bg-card2), var(--bg-card));
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px;
+  }
+  .ai-panel .ai-label {
+    font-size: 10px; font-weight: 700; color: var(--accent);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ai-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: blink 1.2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .ai-panel .ai-text { font-size: 13px; color: var(--text-1); line-height: 1.5; }
+
+  /* ============================================================
+     PMS TRACKER
+  ============================================================ */
+  .pms-cycle-tabs {
+    display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .pms-cycle-tabs::-webkit-scrollbar { display: none; }
+  .cycle-tab {
+    flex-shrink: 0;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 12px; color: var(--text-2); cursor: pointer; transition: all 0.2s;
+  }
+  .cycle-tab.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+
+  .pms-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .pms-item:hover { border-color: var(--border-glow); }
+  .pms-icon { font-size: 22px; flex-shrink: 0; }
+  .pms-info { flex: 1; }
+  .pms-name { font-size: 13px; font-weight: 600; color: var(--text-1); }
+  .pms-meta { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+  .pms-due {
+    font-size: 11px; font-weight: 700;
+    font-family: var(--font-mono);
+    padding: 4px 8px; border-radius: 6px;
+  }
+  .due-ok     { background: var(--green-dim); color: var(--green); }
+  .due-soon   { background: var(--amber-dim); color: var(--amber); }
+  .due-overdue{ background: var(--red-dim);   color: var(--red);   }
+
+  /* ============================================================
+     LEARNING MODE
+  ============================================================ */
+  .learn-module {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px; margin-bottom: 10px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .learn-module:hover { border-color: var(--border-glow); }
+  .lm-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .lm-icon { font-size: 26px; }
+  .lm-title { font-size: 15px; font-weight: 700; color: var(--text-1); }
+  .lm-topics-count { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .lm-progress-wrap { margin-bottom: 8px; }
+  .lm-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .lm-bar-fill { height: 100%; border-radius: 4px; background: var(--purple); transition: width 0.5s; }
+  .lm-pct { font-size: 10px; color: var(--text-3); font-family: var(--font-mono); margin-top: 3px; text-align: right; }
+  .lm-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .lm-chip {
+    font-size: 10px; padding: 3px 8px;
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--text-2);
+  }
+
+  /* Quick Notes */
+  .notes-area {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 100%; min-height: 120px;
+    padding: 12px 14px;
+    color: var(--text-1); font-size: 13px;
+    font-family: var(--font-main); line-height: 1.5;
+    resize: vertical; outline: none;
+    margin-bottom: 8px;
+  }
+  .notes-area:focus { border-color: var(--accent); }
+  .notes-area::placeholder { color: var(--text-3); }
+
+  /* ============================================================
+     REPORT PAGE
+  ============================================================ */
+  .report-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .report-card:hover { border-color: var(--accent); background: var(--bg-hover); }
+  .report-card .rc-icon { font-size: 24px; }
+  .report-card .rc-info { flex: 1; }
+  .report-card .rc-title { font-size: 14px; font-weight: 600; color: var(--text-1); }
+  .report-card .rc-desc { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+  .report-card .rc-arrow { color: var(--text-3); font-size: 14px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed;
+    inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 500; align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%; max-height: 85vh;
+    overflow-y: auto; padding: 20px 16px;
+    animation: slide-up 0.25s ease-out;
+  }
+  @keyframes slide-up {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border-glow);
+    border-radius: 4px; margin: -8px auto 16px;
+  }
+  .modal-title { font-size: 17px; font-weight: 800; color: var(--text-1); margin-bottom: 14px; }
+  .modal-close-btn {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 16px;
+    color: var(--text-2); font-size: 13px; font-weight: 600;
+    cursor: pointer; width: 100%; margin-top: 12px;
+    font-family: var(--font-main);
+  }
+
+  /* Floating Action Button */
+  .fab {
+    position: fixed; bottom: calc(var(--nav-h) + 16px); right: 16px;
+    width: 52px; height: 52px;
+    background: var(--accent); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,212,255,0.4);
+    z-index: 200; transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+  }
+  .fab:hover { transform: scale(1.05); box-shadow: 0 6px 28px rgba(0,212,255,0.5); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: calc(var(--nav-h) + 80px); left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-card2); border: 1px solid var(--accent);
+    color: var(--accent); font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border-radius: 30px;
+    z-index: 1000; opacity: 0; transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Misc */
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .text-accent { color: var(--accent); }
+  .text-amber  { color: var(--amber); }
+  .text-red    { color: var(--red); }
+  .text-green  { color: var(--green); }
+  .btn-primary {
+    background: var(--accent); border: none;
+    border-radius: var(--radius-sm); padding: 10px 20px;
+    color: #000; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: var(--font-main);
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 20px;
+    color: var(--text-2); font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: var(--font-main);
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--border-glow); color: var(--text-1); }
+
+  textarea { resize: vertical; }
+
+  /* ============================================================
+     AMC / VENDOR TRACKER
+  ============================================================ */
+  .vendor-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px; margin-bottom: 8px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .vendor-item:hover { border-color: var(--border-glow); }
+  .vi-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .vi-name { flex: 1; font-size: 14px; font-weight: 700; color: var(--text-1); }
+  .vi-status { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+  .vi-meta { font-size: 11px; color: var(--text-3); line-height: 1.6; }
+
+  /* ============================================================
+     RESPONSIVE TWEAKS
+  ============================================================ */
+  @media (min-width: 480px) {
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo">SMP <span>Pro</span></div>
+    <div class="store-badge" id="active-store-badge" onclick="navTo('stores')">Kurla Shelter</div>
+    <div class="icon-btn" onclick="openNotifications()">🔔</div>
+    <div class="icon-btn" onclick="openQuickAdd()">⚡</div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="content">
+
+    <!-- ======================== DASHBOARD ======================== -->
+    <div class="page active" id="page-dashboard">
+      <div class="dash-header">
+        <div class="greeting">Assalamu Alaikum 👋</div>
+        <div class="name">Amir <span>Khan</span></div>
+        <div class="role">🔧 Senior Electrician Technician · DPI West 1</div>
+        <div class="date-str" id="dash-date">—</div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card accent" onclick="navTo('checklist')">
+          <div class="kpi-icon">🏪</div>
+          <div class="kpi-val" id="kpi-stores">6</div>
+          <div class="kpi-lbl">Active Stores</div>
+        </div>
+        <div class="kpi-card amber" onclick="navTo('pms')">
+          <div class="kpi-icon">📋</div>
+          <div class="kpi-val" id="kpi-pms">3</div>
+          <div class="kpi-lbl">PMS Due</div>
+        </div>
+        <div class="kpi-card red" onclick="navTo('breakdown')">
+          <div class="kpi-icon">⚠️</div>
+          <div class="kpi-val" id="kpi-breakdown">1</div>
+          <div class="kpi-lbl">Breakdowns</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-val" id="kpi-done">0</div>
+          <div class="kpi-lbl">Done Today</div>
+        </div>
+      </div>
+
+      <div class="section-label">Store Health</div>
+      <div id="store-health-list"></div>
+
+      <div class="section-label">Today's Priority Tasks</div>
+      <div class="card" id="today-tasks-container"></div>
+
+      <div class="section-label">AMC & Vendor Alerts</div>
+      <div class="card">
+        <div class="task-item">
+          <div class="task-check">🔵</div>
+          <div class="t-info">
+            <div class="t-name">Blue Star AC — AMC Visit Due</div>
+            <div class="t-meta">Kurla Shelter · Scheduled this week</div>
+          </div>
+          <span class="t-badge badge-warn">Pending</span>
+        </div>
+        <div class="task-item">
+          <div class="task-check">🔴</div>
+          <div class="t-info">
+            <div class="t-name">Cold Room Fan Motor — Escalation</div>
+            <div class="t-meta">DPI64519 · Blue Star ticket open</div>
+          </div>
+          <span class="t-badge badge-crit">Critical</span>
+        </div>
+        <div class="task-item">
+          <div class="task-check">🟡</div>
+          <div class="t-info">
+            <div class="t-name">Fire Extinguisher Refill Due</div>
+            <div class="t-meta">Huma Mall · Expiry in 18 days</div>
+          </div>
+          <span class="t-badge badge-warn">18 Days</span>
+        </div>
+      </div>
+
+      <div class="section-label">Quick Notes</div>
+      <textarea class="notes-area" placeholder="Field notes, observations, action items... (auto-saved)" id="quick-notes" oninput="saveNotes()"></textarea>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button class="btn-primary" onclick="copyNotes()">📋 Copy</button>
+        <button class="btn-secondary" onclick="shareNotes()">📤 WhatsApp</button>
+      </div>
+    </div>
+
+    <!-- ======================== CHECKLIST ======================== -->
+    <div class="page" id="page-checklist">
+      <div class="section-label" style="margin-top:4px">Select Store</div>
+      <div class="store-selector" id="store-chips"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;font-size:13px;color:var(--text-2);">
+          <span id="cl-store-name" style="color:var(--accent);font-weight:700;">Kurla Shelter</span>
+          · <span id="cl-progress-text">0/0 done</span>
+        </div>
+        <button class="btn-primary" style="padding:7px 14px;font-size:12px;" onclick="generateChecklistReport()">📤 Report</button>
+      </div>
+      <div id="checklist-body"></div>
+    </div>
+
+    <!-- ======================== BREAKDOWN ======================== -->
+    <div class="page" id="page-breakdown">
+      <div class="ai-panel">
+        <div class="ai-label"><div class="ai-dot"></div> AI Fault Assistant — PS540G / Refrigeration / Electrical</div>
+        <div class="ai-text">Equipment ka naam ya problem type karo — main troubleshooting steps dikhaunga. Jaise: "oven not heating", "cold room temperature high", "AC not cooling"</div>
+      </div>
+
+      <div class="breakdown-search">
+        <input class="bd-input" id="bd-search" placeholder="e.g. oven not heating..." onkeydown="if(event.key==='Enter') searchFault()">
+        <button class="bd-btn" onclick="searchFault()">🔍 Search</button>
+      </div>
+
+      <div id="fault-results"></div>
+
+      <div class="section-label">Common Fault Library</div>
+      <div id="fault-library"></div>
+    </div>
+
+    <!-- ======================== PMS ======================== -->
+    <div class="page" id="page-pms">
+      <div class="pms-cycle-tabs" id="pms-tabs"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="flex:1;font-size:12px;color:var(--text-2);">All stores · <span id="pms-cycle-label" style="color:var(--accent);">Daily</span> tasks</div>
+        <button class="btn-primary" style="padding:7px 14px;font-size:12px;" onclick="pmsReport()">📤 PMS Report</button>
+      </div>
+      <div id="pms-list"></div>
+    </div>
+
+    <!-- ======================== STORES ======================== -->
+    <div class="page" id="page-stores">
+      <div class="section-label" style="margin-top:4px;">My Stores — DPI West 1</div>
+      <div id="stores-grid"></div>
+
+      <div class="section-label">AMC & Vendor Tracker</div>
+      <div id="vendor-tracker"></div>
+
+      <div class="section-label">Asset Register</div>
+      <div class="card">
+        <div class="task-item">
+          <div style="font-size:20px;">🔧</div>
+          <div class="t-info">
+            <div class="t-name">PS540G Conveyor Oven</div>
+            <div class="t-meta">6 units · All stores · Last PM: This week</div>
+          </div>
+          <span class="t-badge badge-ok">Active</span>
+        </div>
+        <div class="task-item">
+          <div style="font-size:20px;">❄️</div>
+          <div class="t-info">
+            <div class="t-name">Blue Star Cold Rooms</div>
+            <div class="t-meta">5 units · AMC Active</div>
+          </div>
+          <span class="t-badge badge-warn">1 Fault</span>
+        </div>
+        <div class="task-item">
+          <div style="font-size:20px;">📷</div>
+          <div class="t-info">
+            <div class="t-name">Hikvision CCTV NVR</div>
+            <div class="t-meta">6 stores · Offline check done</div>
+          </div>
+          <span class="t-badge badge-ok">Online</span>
+        </div>
+        <div class="task-item">
+          <div style="font-size:20px;">🔋</div>
+          <div class="t-info">
+            <div class="t-name">UPS Systems</div>
+            <div class="t-meta">6 units · Battery health check pending</div>
+          </div>
+          <span class="t-badge badge-warn">Check Due</span>
+        </div>
+        <div class="task-item">
+          <div style="font-size:20px;">🚴</div>
+          <div class="t-info">
+            <div class="t-name">E-Bikes</div>
+            <div class="t-meta">Multiple stores · Monthly check</div>
+          </div>
+          <span class="t-badge badge-ok">Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== LEARNING ======================== -->
+    <div class="page" id="page-learn">
+      <div class="ai-panel">
+        <div class="ai-label"><div class="ai-dot"></div> Learning Mode — Field Technician Training</div>
+        <div class="ai-text">Module select karo — theory + field tips + quiz milega. Aapka progress save hoga automatically.</div>
+      </div>
+      <div id="learn-list"></div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- NAVBAR -->
+  <div id="navbar">
+    <div class="nav-item active" onclick="navTo('dashboard')" id="nav-dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="navTo('checklist')" id="nav-checklist">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+      Checklist
+    </div>
+    <div class="nav-item" onclick="navTo('breakdown')" id="nav-breakdown">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Faults
+    </div>
+    <div class="nav-item" onclick="navTo('pms')" id="nav-pms">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      PMS
+    </div>
+    <div class="nav-item" onclick="navTo('stores')" id="nav-stores">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Stores
+    </div>
+    <div class="nav-item" onclick="navTo('learn')" id="nav-learn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+      Learn
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- FLOATING ACTION BUTTON -->
+<button class="fab" onclick="quickBreakdown()" title="Log Breakdown">⚡</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">—</div>
+    <div id="modal-content"></div>
+    <button class="modal-close-btn" onclick="closeModal()">✕ Close</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const STORES = [
+  { id: 'DPI64519', name: 'Kurla Shelter',  short: 'Kurla Sh', health: 88, region: 'West 1' },
+  { id: 'DPI64277', name: 'IIT Powai',       short: 'IIT Pow', health: 72, region: 'West 1' },
+  { id: 'DPI63831', name: 'Huma Mall',       short: 'Huma Ml', health: 95, region: 'West 1' },
+  { id: 'DPI64734', name: 'Ghatkopar West',  short: 'Ghatko',  health: 60, region: 'West 1' },
+  { id: 'DPI66020', name: 'Vikhroli West',   short: 'Vikh W',  health: 82, region: 'West 1' },
+  { id: 'DPI00001', name: 'Dhamji Shamji',   short: 'Dhamji',  health: 78, region: 'West 1' },
+];
+
+const CHECKLIST_CATEGORIES = [
+  {
+    id: 'temp', icon: '🌡️', title: 'Temperature Check',
+    items: [
+      { id: 'tc1', name: 'Cold Room Temperature', sub: 'Target: -18°C to -22°C (Freezer)' },
+      { id: 'tc2', name: 'Makeline Temperature', sub: 'Target: 2°C to 4°C' },
+      { id: 'tc3', name: 'Walk-in Cooler', sub: 'Target: 0°C to 4°C' },
+      { id: 'tc4', name: 'Hot Water / Hand Wash', sub: 'Check water heater & flow' },
+      { id: 'tc5', name: 'AC Working Check', sub: 'Cooling ok, no abnormal noise' },
+    ]
+  },
+  {
+    id: 'oven', icon: '🔥', title: 'Oven PMS & Check',
+    items: [
+      { id: 'ov1', name: 'PS540G Conveyor Oven Temp', sub: 'Set 485°F / Check actual' },
+      { id: 'ov2', name: 'Hood & Filter Cleaning', sub: 'Grease trap + filter inspect' },
+      { id: 'ov3', name: 'Lubrication — Conveyor Belt', sub: '3–4" deflection check' },
+      { id: 'ov4', name: 'Blower Fan Check', sub: 'Sound + 2300 RPM verify' },
+      { id: 'ov5', name: 'Ignition System Check', sub: 'Spark gap 1/8", flame current >0.5µA' },
+      { id: 'ov6', name: 'Stack Card Update', sub: 'Log last PM date + technician sign' },
+      { id: 'ov7', name: 'Gas Pressure Check', sub: 'LPG: 11.5–12" WC' },
+    ]
+  },
+  {
+    id: 'gas', icon: '⛽', title: 'Gas Bank / PNG Line',
+    items: [
+      { id: 'gs1', name: 'Pipeline Leakage Test', sub: 'Soap solution test on all joints' },
+      { id: 'gs2', name: 'Regulator Leakage Check', sub: 'Primary + secondary regulator' },
+      { id: 'gs3', name: 'Cylinder / Bank Level', sub: 'Note reading & remaining days' },
+      { id: 'gs4', name: 'Emergency Shut-off Valve', sub: 'Operation test — smooth turn' },
+      { id: 'gs5', name: 'Gas Manifold Condition', sub: 'No cracks, corrosion check' },
+    ]
+  },
+  {
+    id: 'elec', icon: '⚡', title: 'Electrical Panel',
+    items: [
+      { id: 'el1', name: 'MCB / MCCB / RCCB Check', sub: 'Trip test + terminal tightness' },
+      { id: 'el2', name: 'Lug Tightening', sub: 'All incoming + outgoing lugs' },
+      { id: 'el3', name: 'Capacitor Bank / PFC', sub: 'Power factor reading log' },
+      { id: 'el4', name: 'EMS Lock / Bypass Status', sub: 'Check bypass mode status' },
+      { id: 'el5', name: 'Switch & Socket Check', sub: '5A / 15A / 3-phase sockets' },
+      { id: 'el6', name: 'Earthing Continuity', sub: 'Panel earth resistance check' },
+      { id: 'el7', name: 'Voltage Reading', sub: 'R-Y-B phases: 220V ±5%' },
+    ]
+  },
+  {
+    id: 'ref', icon: '❄️', title: 'Refrigeration & AC',
+    items: [
+      { id: 'rf1', name: 'AC Filter Cleaning', sub: 'Wash or blow-clean filters' },
+      { id: 'rf2', name: 'AC Drain Line Check', sub: 'Clear blockage, water flow ok' },
+      { id: 'rf3', name: 'Condenser Coil Check', sub: 'Fins clean, no blockage' },
+      { id: 'rf4', name: 'Cold Room Door Gasket', sub: 'Seal condition, no tears' },
+      { id: 'rf5', name: 'Defrost Cycle Check', sub: 'Auto defrost working correctly' },
+      { id: 'rf6', name: 'Refrigerant Pressure', sub: 'Suction / discharge pressure log' },
+    ]
+  },
+  {
+    id: 'ups', icon: '🔋', title: 'UPS System',
+    items: [
+      { id: 'up1', name: 'UPS Battery Health', sub: 'Voltage, backup time test' },
+      { id: 'up2', name: 'Bypass Mode Check', sub: 'Manual bypass operation test' },
+      { id: 'up3', name: 'Load Percentage', sub: 'Current load vs rated capacity' },
+      { id: 'up4', name: 'Battery Terminals', sub: 'Corrosion check, tightness' },
+      { id: 'up5', name: 'UPS Alarm / Fault Log', sub: 'Note any event log entries' },
+    ]
+  },
+  {
+    id: 'ebike', icon: '🚴', title: 'E-Bike',
+    items: [
+      { id: 'eb1', name: 'Battery Charge Level', sub: 'Check % and estimate range' },
+      { id: 'eb2', name: 'Charger Working', sub: 'Charging indicator, no heating' },
+      { id: 'eb3', name: 'Headlight & Indicators', sub: 'All lights functional' },
+      { id: 'eb4', name: 'Tyre Pressure', sub: 'Front & rear pressure check' },
+      { id: 'eb5', name: 'Mirror & Horn', sub: 'Position + horn sound ok' },
+      { id: 'eb6', name: 'Box / Carrier Cleaning', sub: 'Clean, no damage' },
+    ]
+  },
+  {
+    id: 'cctv', icon: '📷', title: 'CCTV System',
+    items: [
+      { id: 'cc1', name: 'All Cameras Online', sub: 'NVR live view — no offline cameras' },
+      { id: 'cc2', name: 'Recording Status', sub: 'HDD recording active' },
+      { id: 'cc3', name: 'Camera Angle Check', sub: 'Coverage correct, no obstruction' },
+      { id: 'cc4', name: 'NVR IP / Network', sub: 'Remote access working' },
+      { id: 'cc5', name: 'HDD Health', sub: 'Smart status, storage days remaining' },
+    ]
+  },
+  {
+    id: 'pest', icon: '🦟', title: 'Pest Control',
+    items: [
+      { id: 'pc1', name: 'Fly Catcher UV Lamp', sub: 'Lamp working, glue board check' },
+      { id: 'pc2', name: 'Air Curtain Working', sub: 'Entrance coverage adequate' },
+      { id: 'pc3', name: 'Door Gaps Check', sub: 'No gaps below doors, brushes ok' },
+      { id: 'pc4', name: 'Drain Covers', sub: 'Fitted, no exposed drains' },
+    ]
+  },
+  {
+    id: 'infra', icon: '🏗️', title: 'Infrastructure',
+    items: [
+      { id: 'if1', name: 'Exhaust Fan Working', sub: 'Check RPM, sound, airflow' },
+      { id: 'if2', name: 'Fresh Air Supply', sub: 'Filter clean, flow adequate' },
+      { id: 'if3', name: 'Lighting Check', sub: 'All lights, no flickering' },
+      { id: 'if4', name: 'RO Filter Status', sub: 'TDS reading + filter due date' },
+      { id: 'if5', name: 'Fire Extinguisher', sub: 'Pressure OK, pin intact, expiry date' },
+      { id: 'if6', name: 'Electronic Safe', sub: 'Battery, door operation check' },
+    ]
+  },
+  {
+    id: 'dg', icon: '🔌', title: 'DG Set',
+    items: [
+      { id: 'dg1', name: 'DG Battery Check', sub: 'Voltage, electrolyte level' },
+      { id: 'dg2', name: 'Engine Oil Level', sub: 'Dipstick reading, color check' },
+      { id: 'dg3', name: 'Running Status Test', sub: '2-minute load test' },
+      { id: 'dg4', name: 'Coolant Level', sub: 'Radiator level + condition' },
+      { id: 'dg5', name: 'Last Service Date', sub: 'Hours log + next service due' },
+    ]
+  },
+];
+
+const FAULT_LIBRARY = [
+  {
+    eq: 'PS540G Conveyor Oven',
+    title: 'Oven Not Heating / Low Temperature',
+    icon: '🔥',
+    steps: [
+      'Gas pressure check karo — LPG: 11.5–12" WC. Regulator issue?',
+      'Ignition system check — spark gap 1/8", electrode condition',
+      'Flame current multimeter se measure karo — minimum 0.5µA chahiye',
+      'Ground connection check karo — 60% flame failures ground fault hai',
+      'Temperature controller DIP switch settings verify karo',
+      'Thermocouple resistance check (Part: 33812-3)',
+      'Ignition module LED fault code dekho (Part: 50239)',
+      'Gas valve operation check (Part: 60679)',
+    ]
+  },
+  {
+    eq: 'PS540G Conveyor Oven',
+    title: 'Conveyor Belt Not Moving',
+    icon: '⚙️',
+    steps: [
+      'Belt tension check — 3–4" max deflection. Over-tight nahi hona chahiye',
+      'Conveyor motor power check — 208–240V, 4.1A rated',
+      'Belt tracking — center mein hona chahiye',
+      'Drive chain lubrication check karo',
+      'Motor capacitor check karo with multimeter',
+      'Overload relay reset try karo',
+      'Conveyor speed control pot damage nahi hona chahiye',
+    ]
+  },
+  {
+    eq: 'Cold Room / Refrigeration',
+    title: 'Cold Room Temperature High',
+    icon: '❄️',
+    steps: [
+      'Door gasket condition check — seal damage common cause hai',
+      'Condenser coil fins — blocked toh pressure high hoga',
+      'Evaporator fan — sab fans chal rahe hain check karo',
+      'Defrost heater check — ice blockage on evaporator?',
+      'Refrigerant pressure measure karo — leak sign?',
+      'Thermostat setting verify karo',
+      'Door opening frequency — staff training needed?',
+    ]
+  },
+  {
+    eq: 'Blue Star AC',
+    title: 'AC Not Cooling',
+    icon: '🌬️',
+    steps: [
+      'Filter cleaning — dirty filter = 30% efficiency loss',
+      'Outdoor unit coil clean hai? Fins blockage check karo',
+      'Refrigerant gas pressure check (suction ~65-70 PSI for R410A)',
+      'Fan motor current measure karo — overload?',
+      'Drain line clear hai? Back-pressure cause kar sakta hai',
+      'Thermostat setting + mode check',
+      'PCB error code dekhو — LED blink pattern note karo',
+    ]
+  },
+  {
+    eq: 'Electrical Panel',
+    title: 'MCB Tripping Frequently',
+    icon: '⚡',
+    steps: [
+      'Load calculation karo — overload hai kya?',
+      'Earth leakage check — RCCB trip = leakage to earth',
+      'Individual circuit IR value check with megger',
+      'MCB rating vs load match karo',
+      'Loose connection check — terminal heating cause',
+      'Short circuit hunt — disconnect loads one by one',
+      'Capacitor bank condition check karo',
+    ]
+  },
+  {
+    eq: 'UPS',
+    title: 'UPS Alarm / Short Backup',
+    icon: '🔋',
+    steps: [
+      'Battery voltage measure karo — 12V batteries, each cell check',
+      'Battery age — 3-4 years se zyada old = replacement needed',
+      'Load percentage check — overloaded UPS = short backup',
+      'Bypass mode engage karke UPS isolate karo for battery test',
+      'Terminal corrosion clean karo',
+      'UPS software/display error code note karo',
+    ]
+  },
+  {
+    eq: 'Hikvision CCTV',
+    title: 'Camera Offline / No Image',
+    icon: '📷',
+    steps: [
+      'NVR channel status check — IP conflict?',
+      'PoE switch port check — power LED on?',
+      'Camera IP address verify — same subnet hona chahiye',
+      'Cable continuity check with cable tester',
+      'NVR login credentials correct hain?',
+      'Camera factory reset + re-add on NVR',
+      'Hikvision tool se SADP scan karo — camera IP find karo',
+    ]
+  },
+];
+
+const PMS_DATA = {
+  Daily: [
+    { icon: '🌡️', name: 'Temperature Log All Stores', meta: '6 stores · Temp record in register', due: 'Today', dueClass: 'due-ok' },
+    { icon: '🔥', name: 'Oven Pre-shift Check', meta: 'All stores · Before opening', due: 'Today', dueClass: 'due-ok' },
+    { icon: '📷', name: 'CCTV Live View Check', meta: 'NVR recording status verify', due: 'Today', dueClass: 'due-ok' },
+    { icon: '⚡', name: 'Panel Indicator Check', meta: 'No alarm, normal operation', due: 'Today', dueClass: 'due-ok' },
+  ],
+  Weekly: [
+    { icon: '❄️', name: 'AC Filter Inspection', meta: 'All ACs · Clean if needed', due: 'In 2 days', dueClass: 'due-soon' },
+    { icon: '🔋', name: 'UPS Battery Test', meta: 'Load test + backup time check', due: 'Overdue', dueClass: 'due-overdue' },
+    { icon: '🚴', name: 'E-Bike Full Check', meta: 'Battery, tyres, lights, brakes', due: 'In 3 days', dueClass: 'due-soon' },
+    { icon: '⛽', name: 'Gas Line Soap Test', meta: 'All joints & regulators', due: 'Tomorrow', dueClass: 'due-soon' },
+  ],
+  '15 Days': [
+    { icon: '🔥', name: 'PS540G Full PMS', meta: 'Belt, blower, ignition, cleaning', due: 'In 5 days', dueClass: 'due-soon' },
+    { icon: '🦟', name: 'Pest Control Round', meta: 'Fly catcher, glue board replace', due: 'Due Today', dueClass: 'due-overdue' },
+    { icon: '💡', name: 'Lights Full Check', meta: 'All areas, replace faulty lamps', due: 'In 8 days', dueClass: 'due-ok' },
+  ],
+  Monthly: [
+    { icon: '⚡', name: 'Panel Full PMS', meta: 'Lugs, MCB test, IR check', due: 'In 12 days', dueClass: 'due-ok' },
+    { icon: '❄️', name: 'Cold Room Deep Clean', meta: 'Coil, drain pan, door seal', due: 'In 15 days', dueClass: 'due-ok' },
+    { icon: '🔌', name: 'DG Set Full Check', meta: 'Oil, coolant, load test', due: 'Overdue', dueClass: 'due-overdue' },
+    { icon: '💧', name: 'RO Filter Check', meta: 'TDS reading + filter condition', due: 'In 7 days', dueClass: 'due-ok' },
+    { icon: '🧯', name: 'Fire Extinguisher Audit', meta: 'Pressure, pin, expiry date', due: 'In 18 days', dueClass: 'due-ok' },
+  ],
+  Quarterly: [
+    { icon: '❄️', name: 'Refrigerant Pressure Log', meta: 'All cold rooms + ACs', due: 'In 45 days', dueClass: 'due-ok' },
+    { icon: '⚡', name: 'Earth Resistance Test', meta: 'Megger test all panels', due: 'In 30 days', dueClass: 'due-ok' },
+    { icon: '🔋', name: 'Battery Bank Replacement Review', meta: 'UPS + DG batteries assess', due: 'In 60 days', dueClass: 'due-ok' },
+    { icon: '🏗️', name: 'Civil & Infrastructure Audit', meta: 'Ceiling, walls, flooring, doors', due: 'In 90 days', dueClass: 'due-ok' },
+  ],
+};
+
+const LEARN_MODULES = [
+  {
+    icon: '⚡', title: 'Electrical Fundamentals',
+    topics: ['Ohm\'s Law', 'MCB vs MCCB', 'RCCB Working', 'Power Factor', 'Earthing'],
+    progress: 80,
+    content: `<b>🔑 Key Concepts:</b><br><br>
+<b>MCB vs MCCB:</b><br>
+• MCB (Miniature Circuit Breaker) — upto 100A, short circuit + overload protection<br>
+• MCCB (Molded Case CB) — 100A to 1000A+, adjustable trip settings<br><br>
+<b>RCCB (Residual Current CB):</b><br>
+• Earth leakage detect karta hai (30mA typical)<br>
+• Phase current ≠ Neutral current → trip ho jaata hai<br>
+• Human protection device — must in wet areas<br><br>
+<b>Power Factor:</b><br>
+• PF = Active Power / Apparent Power<br>
+• Good PF: 0.95 – 1.0<br>
+• Low PF = penalty from MSEDCL + high current<br>
+• Capacitor bank PF improve karta hai<br><br>
+<b>Earthing:</b><br>
+• Fault current safe path to ground<br>
+• Earth resistance < 1 Ohm ideal<br>
+• Megger se quarterly test karo`
+  },
+  {
+    icon: '🔥', title: 'PS540G Oven Mastery',
+    topics: ['Gas Pressure', 'Ignition', 'Belt Tension', 'Fault Codes', 'PM Checklist'],
+    progress: 95,
+    content: `<b>🔑 PS540G Critical Values:</b><br><br>
+• Gas Pressure LPG: <b>11.5–12" WC</b><br>
+• Gas Pressure NG: <b>6–12" WC</b><br>
+• BTU Output: <b>110,000 BTU/hr</b><br>
+• Max Operating Temp: <b>550°F</b><br>
+• High Limit Trip: <b>650°F</b><br>
+• Blower Motor: <b>2300 RPM / 3000 FPM</b><br>
+• Belt Tension: <b>3–4" max deflection</b><br>
+• Spark Gap: <b>1/8 inch</b><br>
+• Flame Current: <b>>0.5µA minimum</b><br>
+• Blower Motor: <b>4.1A / 208–240V</b><br><br>
+<b>Part Numbers:</b><br>
+• Ignition Module: <b>#50239</b><br>
+• Gas Valve: <b>#60679</b><br>
+• Temp Controller: <b>#47321</b><br>
+• Thermocouple: <b>#33812-3</b><br><br>
+<b>⚠️ Field Insight:</b> 60% flame failures = ground connection fault!`
+  },
+  {
+    icon: '❄️', title: 'Refrigeration & Cold Chain',
+    topics: ['Refrigeration Cycle', 'Troubleshooting', 'Temperature Logging', 'Defrost', 'Leak Detection'],
+    progress: 65,
+    content: `<b>🔑 Refrigeration Basics:</b><br><br>
+<b>Basic Cycle:</b><br>
+Compressor → Condenser → Expansion Valve → Evaporator → back to Compressor<br><br>
+<b>Cold Room Temperatures:</b><br>
+• Freezer: -18°C to -22°C<br>
+• Chiller/Walk-in: 0°C to 4°C<br>
+• Makeline: 2°C to 4°C<br><br>
+<b>Common Faults:</b><br>
+1. High temp → dirty condenser / door seal problem<br>
+2. Short cycling → overcharge or low charge<br>
+3. Excessive frosting → defrost heater fault<br>
+4. Noisy compressor → low oil or bearing wear<br><br>
+<b>R410A Pressures (approx):</b><br>
+• Suction (Low side): 65–75 PSI<br>
+• Discharge (High): 250–350 PSI`
+  },
+  {
+    icon: '🌬️', title: 'HVAC / AC Systems',
+    topics: ['Cooling Cycle', 'AC PMS', 'Blue Star Faults', 'PCB Codes', 'Gas Charging'],
+    progress: 55,
+    content: `<b>🔑 AC Maintenance Points:</b><br><br>
+<b>Blue Star Split AC PMS:</b><br>
+• Monthly: Filter clean<br>
+• Quarterly: Coil cleaning, drain flush<br>
+• Annual: Gas pressure check, deep service<br><br>
+<b>Common Error Codes (Blue Star):</b><br>
+• E1 — Indoor sensor fault<br>
+• E2 — Outdoor sensor fault<br>
+• E3 — High pressure protection<br>
+• E4 — Low pressure protection<br>
+• F1 — Communication error<br><br>
+<b>Gas Charging (R410A):</b><br>
+• Always charge in liquid state<br>
+• Use manifold gauge<br>
+• Weigh in — don't guess<br>
+• Overcharge = high discharge pressure`
+  },
+  {
+    icon: '🔋', title: 'UPS Systems',
+    topics: ['VRLA Battery', 'Bypass Mode', 'Load Management', 'Fault Diagnosis'],
+    progress: 40,
+    content: `<b>🔑 UPS Key Knowledge:</b><br><br>
+<b>Types Used in QSR:</b><br>
+• Online Double Conversion — best protection<br>
+• Line Interactive — moderate protection<br><br>
+<b>Battery Maintenance:</b><br>
+• VRLA (Sealed) — no water top-up needed<br>
+• Check voltage: 12V battery = 12.6–13.2V when charged<br>
+• Replace if < 10.5V under load<br>
+• Average life: 3–5 years<br><br>
+<b>Bypass Mode:</b><br>
+1. Inform manager — brief outage possible<br>
+2. Engage manual bypass switch<br>
+3. Work on UPS safely<br>
+4. Restore UPS → remove bypass<br><br>
+<b>Load Management:</b><br>
+• Never exceed 80% of rated VA<br>
+• Critical loads only on UPS`
+  },
+  {
+    icon: '📷', title: 'CCTV / Hikvision',
+    topics: ['IP Config', 'NVR Setup', 'Troubleshooting', 'Remote Access', 'HDD Health'],
+    progress: 70,
+    content: `<b>🔑 Hikvision Field Guide:</b><br><br>
+<b>Common IP Issues:</b><br>
+• Default IP: 192.168.1.64<br>
+• Use SADP Tool to find camera on network<br>
+• All cameras must be on same subnet as NVR<br>
+• Subnet mismatch = offline in NVR<br><br>
+<b>NVR Login:</b><br>
+• Default user: admin<br>
+• Password: device-specific (check label)<br>
+• Change default passwords — security rule<br><br>
+<b>HDD Health:</b><br>
+• NVR → Storage → HDD Info → S.M.A.R.T<br>
+• Normal = OK, check remaining lifespan<br>
+• HDD overwrite cycle: typically 30 days<br><br>
+<b>Remote Access:</b><br>
+• Hik-Connect app se remote view<br>
+• Port 8000 router pe forward karo<br>
+• DDNS setup for dynamic IP stores`
+  },
+  {
+    icon: '⛽', title: 'Gas Bank & LPG Safety',
+    topics: ['Pressure Regulations', 'Leak Testing', 'Safety Procedure', 'Regulator Types'],
+    progress: 50,
+    content: `<b>🔑 Gas Bank Safety:</b><br><br>
+<b>LPG Pressure Stages:</b><br>
+• Cylinder: 5–7 bar (high pressure)<br>
+• After first-stage regulator: ~1 bar<br>
+• At equipment: 11.5–12" WC (280–300 mbar)<br><br>
+<b>Leak Test Procedure:</b><br>
+1. Gas pressure on karo<br>
+2. Soapy water solution prepare karo<br>
+3. Har joint, valve, regulator pe apply karo<br>
+4. Bubble formation = leak confirmed<br>
+5. Tighten / replace fitting — retest<br>
+6. Never use flame for leak test!<br><br>
+<b>Emergency Procedure:</b><br>
+• Gas smell → ventilate immediately<br>
+• Main valve band karo<br>
+• No flames, no electric switches<br>
+• Call vendor + manager`
+  },
+  {
+    icon: '🔌', title: 'DG Set Maintenance',
+    topics: ['Engine Check', 'Battery', 'Load Test', 'AMF Panel', 'Log Book'],
+    progress: 30,
+    content: `<b>🔑 DG Set PM Points:</b><br><br>
+<b>Weekly Checks:</b><br>
+• Battery terminal condition<br>
+• Engine oil level (dipstick)<br>
+• Coolant level in radiator<br>
+• No fuel/oil leaks<br><br>
+<b>Monthly:</b><br>
+• Load test 30 minutes<br>
+• Check exhaust color (black = rich mix)<br>
+• Air filter condition<br>
+• Note hours meter reading<br><br>
+<b>AMF Panel (Auto Mains Failure):</b><br>
+• Mains fail → DG auto start in 10–15 sec<br>
+• Check transfer switch operation<br>
+• Set timer: 10s crank, 3 attempts<br><br>
+<b>Service Intervals:</b><br>
+• Engine oil: 250 hours or 6 months<br>
+• Air filter: 500 hours<br>
+• Coolant flush: Annual`
+  },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  activeStore: 0,
+  checklistData: {},
+  activePmsCycle: 'Daily',
+  currentPage: 'dashboard',
+  dailyDone: 0,
+};
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadFromStorage();
+  renderDashDate();
+  renderStoreHealth();
+  renderTodayTasks();
+  renderStoreChips();
+  renderChecklist();
+  renderFaultLibrary();
+  renderPmsTabs();
+  renderPmsList();
+  renderStoresPage();
+  renderVendorTracker();
+  renderLearnModules();
+  loadNotes();
+  updateKPIs();
+}
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem('smp_checklist');
+    if (saved) state.checklistData = JSON.parse(saved);
+    const st = localStorage.getItem('smp_activestore');
+    if (st !== null) state.activeStore = parseInt(st);
+  } catch(e) {}
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem('smp_checklist', JSON.stringify(state.checklistData));
+    localStorage.setItem('smp_activestore', state.activeStore);
+  } catch(e) {}
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  state.currentPage = page;
+  document.getElementById('content').scrollTop = 0;
+}
+
+// ============================================================
+// DATE
+// ============================================================
+function renderDashDate() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const str = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} · ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  document.getElementById('dash-date').textContent = str;
+}
+
+// ============================================================
+// STORE HEALTH
+// ============================================================
+function renderStoreHealth() {
+  const list = document.getElementById('store-health-list');
+  list.innerHTML = STORES.map((s, i) => {
+    const h = s.health;
+    const color = h >= 85 ? '#22c55e' : h >= 65 ? '#f59e0b' : '#ef4444';
+    return `<div class="store-health-row" onclick="goToStore(${i})">
+      <div class="store-dot" style="background:${color}"></div>
+      <div class="s-name">${s.name}</div>
+      <div class="s-id">${s.id}</div>
+      <div class="health-bar-wrap">
+        <div class="health-bar"><div class="health-bar-fill" style="width:${h}%;background:${color}"></div></div>
+        <div class="health-pct">${h}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goToStore(i) {
+  state.activeStore = i;
+  localStorage.setItem('smp_activestore', i);
+  document.getElementById('active-store-badge').textContent = STORES[i].short;
+  navTo('checklist');
+  renderChecklist();
+  renderStoreChips();
+  showToast('📍 ' + STORES[i].name);
+}
+
+// ============================================================
+// TODAY'S TASKS
+// ============================================================
+function renderTodayTasks() {
+  const tasks = [
+    { name: 'PS540G PMS — Kurla Shelter', meta: 'Oven conveyor belt + ignition check', badge: 'badge-warn', bl: 'PMS Due', id: 'tt1' },
+    { name: 'Cold Room Temp Log', meta: 'All 6 stores · Morning temp record', badge: 'badge-info', bl: 'Daily', id: 'tt2' },
+    { name: 'Blue Star AC — AMC Coordination', meta: 'DPI64519 · Fan motor escalation', badge: 'badge-crit', bl: 'Urgent', id: 'tt3' },
+    { name: 'CCTV Online Check', meta: 'Ghatkopar West · Camera offline reported', badge: 'badge-warn', bl: 'Check', id: 'tt4' },
+    { name: 'Panel Lug Tightening', meta: 'IIT Powai · Monthly PM scheduled', badge: 'badge-vendor', bl: 'Monthly', id: 'tt5' },
+  ];
+  const container = document.getElementById('today-tasks-container');
+  container.innerHTML = tasks.map(t => {
+    const done = (state.checklistData['todaytask_' + t.id] === true);
+    return `<div class="task-item">
+      <div class="task-check ${done ? 'done' : ''}" onclick="toggleTodayTask('${t.id}', this)">
+        ${done ? '✓' : ''}
+      </div>
+      <div class="t-info">
+        <div class="t-name" style="${done ? 'text-decoration:line-through;color:var(--text-3)' : ''}">${t.name}</div>
+        <div class="t-meta">${t.meta}</div>
+      </div>
+      <span class="t-badge ${t.badge}">${t.bl}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleTodayTask(id, el) {
+  const done = !el.classList.contains('done');
+  state.checklistData['todaytask_' + id] = done;
+  saveToStorage();
+  renderTodayTasks();
+  updateKPIs();
+}
+
+function updateKPIs() {
+  let done = 0;
+  Object.keys(state.checklistData).forEach(k => {
+    if (k.startsWith('todaytask_') && state.checklistData[k] === true) done++;
+  });
+  document.getElementById('kpi-done').textContent = done;
+}
+
+// ============================================================
+// STORE CHIPS
+// ============================================================
+function renderStoreChips() {
+  const cont = document.getElementById('store-chips');
+  cont.innerHTML = STORES.map((s, i) =>
+    `<div class="store-chip ${i === state.activeStore ? 'active' : ''}" onclick="selectStore(${i})">${s.name}</div>`
+  ).join('');
+  document.getElementById('cl-store-name').textContent = STORES[state.activeStore].name;
+}
+
+function selectStore(i) {
+  state.activeStore = i;
+  localStorage.setItem('smp_activestore', i);
+  document.getElementById('active-store-badge').textContent = STORES[i].short;
+  renderStoreChips();
+  renderChecklist();
+}
+
+// ============================================================
+// CHECKLIST
+// ============================================================
+function getCheckKey(storeId, itemId) {
+  return storeId + '_' + itemId;
+}
+
+function renderChecklist() {
+  const store = STORES[state.activeStore];
+  const body = document.getElementById('checklist-body');
+
+  let totalItems = 0, doneItems = 0;
+  CHECKLIST_CATEGORIES.forEach(cat => {
+    cat.items.forEach(item => {
+      totalItems++;
+      const v = state.checklistData[getCheckKey(store.id, item.id)];
+      if (v) doneItems++;
+    });
+  });
+
+  document.getElementById('cl-progress-text').textContent = `${doneItems}/${totalItems} done`;
+
+  body.innerHTML = CHECKLIST_CATEGORIES.map(cat => {
+    let catDone = 0;
+    cat.items.forEach(item => {
+      if (state.checklistData[getCheckKey(store.id, item.id)]) catDone++;
+    });
+    const catPct = Math.round((catDone / cat.items.length) * 100);
+
+    return `<div class="checklist-category">
+      <div class="cat-header" onclick="toggleCat(this)">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-title">${cat.title}</span>
+        <span class="cat-progress">${catDone}/${cat.items.length}</span>
+        <span class="cat-arrow">›</span>
+      </div>
+      <div class="cat-body">
+        <div class="cat-progress-bar">
+          <div class="cat-progress-fill" style="width:${catPct}%"></div>
+        </div>
+        ${cat.items.map(item => {
+          const key = getCheckKey(store.id, item.id);
+          const val = state.checklistData[key] || null;
+          return `<div class="check-row">
+            <div class="c-label">
+              <div class="c-name">${item.name}</div>
+              <div class="c-sub">${item.sub}</div>
+            </div>
+            <div class="status-btns">
+              <button class="status-btn ${val==='ok'?'sel-ok':''}" onclick="setStatus('${key}','ok',this)" title="Working">✅</button>
+              <button class="status-btn ${val==='fail'?'sel-fail':''}" onclick="setStatus('${key}','fail',this)" title="Not Working">❌</button>
+              <button class="status-btn ${val==='obs'?'sel-obs':''}" onclick="setStatus('${key}','obs',this)" title="Observation">⚠️</button>
+              <button class="status-btn ${val==='vendor'?'sel-vendor':''}" onclick="setStatus('${key}','vendor',this)" title="Need Vendor">🔧</button>
+              <button class="status-btn ${val==='crit'?'sel-crit':''}" onclick="setStatus('${key}','crit',this)" title="Critical">🚨</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCat(header) {
+  const body = header.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.cat-body.open').forEach(b => {
+    b.classList.remove('open');
+    b.previousElementSibling.classList.remove('open');
+  });
+  if (!isOpen) {
+    body.classList.add('open');
+    header.classList.add('open');
+  }
+}
+
+function setStatus(key, val, btn) {
+  const btns = btn.parentElement.querySelectorAll('.status-btn');
+  btns.forEach(b => b.className = 'status-btn');
+  const prev = state.checklistData[key];
+  if (prev === val) {
+    delete state.checklistData[key];
+  } else {
+    state.checklistData[key] = val;
+    const cls = {ok:'sel-ok', fail:'sel-fail', obs:'sel-obs', vendor:'sel-vendor', crit:'sel-crit'};
+    btn.classList.add(cls[val]);
+    if (val === 'crit') showToast('🚨 Critical issue logged!');
+    if (val === 'vendor') showToast('🔧 Vendor escalation flagged');
+  }
+  saveToStorage();
+
+  let done = 0;
+  const store = STORES[state.activeStore];
+  CHECKLIST_CATEGORIES.forEach(cat => cat.items.forEach(item => {
+    if (state.checklistData[getCheckKey(store.id, item.id)]) done++;
+  }));
+  const total = CHECKLIST_CATEGORIES.reduce((s, c) => s + c.items.length, 0);
+  document.getElementById('cl-progress-text').textContent = `${done}/${total} done`;
+}
+
+// ============================================================
+// FAULT LIBRARY
+// ============================================================
+function renderFaultLibrary() {
+  const lib = document.getElementById('fault-library');
+  lib.innerHTML = FAULT_LIBRARY.map((f, i) =>
+    `<div class="fault-card" onclick="showFaultDetail(${i})">
+      <div class="fc-eq">${f.icon} ${f.eq}</div>
+      <div class="fc-title">${f.title}</div>
+      <ul class="fc-steps">
+        ${f.steps.slice(0, 3).map((s, idx) =>
+          `<li><span class="step-num">${idx+1}.</span><span>${s}</span></li>`
+        ).join('')}
+        <li style="color:var(--accent);font-size:12px;padding-top:4px;border:none">
+          + ${f.steps.length - 3} more steps → Tap to expand
+        </li>
+      </ul>
+    </div>`
+  ).join('');
+}
+
+function showFaultDetail(i) {
+  const f = FAULT_LIBRARY[i];
+  openModal(`${f.icon} ${f.title}`,
+    `<div style="font-size:12px;color:var(--accent);margin-bottom:12px;font-weight:600;">${f.eq}</div>
+    <ol style="padding-left:0;list-style:none;">
+      ${f.steps.map((s, idx) =>
+        `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+          <span style="font-family:var(--font-mono);color:var(--accent);font-size:12px;font-weight:700;min-width:22px;">${idx+1}.</span>
+          <span style="font-size:13px;color:var(--text-1);line-height:1.5;">${s}</span>
+        </div>`
+      ).join('')}
+    </ol>
+    <button class="btn-secondary" style="width:100%;margin-top:14px;" onclick="shareBreakdown(${i})">📤 Share on WhatsApp</button>`
+  );
+}
+
+function searchFault() {
+  const query = document.getElementById('bd-search').value.toLowerCase().trim();
+  const results = document.getElementById('fault-results');
+  if (!query) { results.innerHTML = ''; return; }
+
+  const found = FAULT_LIBRARY.filter(f =>
+    f.title.toLowerCase().includes(query) ||
+    f.eq.toLowerCase().includes(query) ||
+    f.steps.some(s => s.toLowerCase().includes(query))
+  );
+
+  if (found.length === 0) {
+    results.innerHTML = `<div class="ai-panel" style="margin-bottom:10px;">
+      <div class="ai-label"><div class="ai-dot"></div> AI Suggestion</div>
+      <div class="ai-text">
+        "<b>${query}</b>" ke liye direct match nahi mila.<br><br>
+        📌 Try karo: "oven", "cold room", "ac", "mcb", "ups", "cctv"<br>
+        📌 Ya apne engineer / service manual se confirm karo.<br>
+        📌 Critical issue → manager ko immediately escalate karo.
+      </div>
+    </div>`;
+    return;
+  }
+
+  results.innerHTML = `<div style="font-size:12px;color:var(--accent);margin-bottom:8px;font-weight:600;">🔍 ${found.length} result${found.length>1?'s':''} found</div>` +
+    found.map((f, i) => {
+      const idx = FAULT_LIBRARY.indexOf(f);
+      return `<div class="fault-card" onclick="showFaultDetail(${idx})">
+        <div class="fc-eq">${f.icon} ${f.eq}</div>
+        <div class="fc-title">${f.title}</div>
+        <ul class="fc-steps">
+          ${f.steps.slice(0, 4).map((s, si) =>
+            `<li><span class="step-num">${si+1}.</span><span>${s}</span></li>`
+          ).join('')}
+        </ul>
+      </div>`;
+    }).join('');
+}
+
+// ============================================================
+// PMS
+// ============================================================
+function renderPmsTabs() {
+  const tabs = document.getElementById('pms-tabs');
+  tabs.innerHTML = Object.keys(PMS_DATA).map(cycle =>
+    `<div class="cycle-tab ${cycle === state.activePmsCycle ? 'active' : ''}" onclick="setPmsCycle('${cycle}')">${cycle}</div>`
+  ).join('');
+}
+
+function setPmsCycle(cycle) {
+  state.activePmsCycle = cycle;
+  renderPmsTabs();
+  renderPmsList();
+  document.getElementById('pms-cycle-label').textContent = cycle;
+}
+
+function renderPmsList() {
+  const list = document.getElementById('pms-list');
+  const items = PMS_DATA[state.activePmsCycle] || [];
+  list.innerHTML = items.map((p, i) =>
+    `<div class="pms-item" onclick="showPmsDetail(${i})">
+      <span class="pms-icon">${p.icon}</span>
+      <div class="pms-info">
+        <div class="pms-name">${p.name}</div>
+        <div class="pms-meta">${p.meta}</div>
+      </div>
+      <span class="pms-due ${p.dueClass}">${p.due}</span>
+    </div>`
+  ).join('');
+  document.getElementById('pms-cycle-label').textContent = state.activePmsCycle;
+}
+
+function showPmsDetail(i) {
+  const items = PMS_DATA[state.activePmsCycle];
+  const p = items[i];
+  openModal(`${p.icon} ${p.name}`,
+    `<div style="margin-bottom:12px;">
+      <span class="pms-due ${p.dueClass}" style="font-size:13px;">${p.due}</span>
+    </div>
+    <div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:14px;">${p.meta}</div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">Cycle: <span style="color:var(--accent);">${state.activePmsCycle}</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="markPmsDone(${i});closeModal()">✅ Mark Complete</button>
+      <button class="btn-secondary" onclick="closeModal()">📋 View SOP</button>
+    </div>`
+  );
+}
+
+function markPmsDone(i) {
+  showToast('✅ PMS marked complete!');
+}
+
+function pmsReport() {
+  const items = PMS_DATA[state.activePmsCycle];
+  let text = `*PMS Report — ${state.activePmsCycle}*\n`;
+  text += `Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+  text += `Technician: Amir Khan · DPI West 1\n\n`;
+  items.forEach((p, i) => {
+    text += `${i+1}. ${p.name}\n   Due: ${p.due} | ${p.meta}\n`;
+  });
+  const encoded = encodeURIComponent(text);
+  window.open(`https://wa.me/?text=${encoded}`, '_blank');
+}
+
+// ============================================================
+// STORES PAGE
+// ============================================================
+function renderStoresPage() {
+  const grid = document.getElementById('stores-grid');
+  grid.innerHTML = STORES.map((s, i) => {
+    const h = s.health;
+    const color = h >= 85 ? '#22c55e' : h >= 65 ? '#f59e0b' : '#ef4444';
+    const statusText = h >= 85 ? 'Good' : h >= 65 ? 'Needs Attention' : 'Critical';
+    return `<div class="card" style="cursor:pointer;border-color:${color}33;" onclick="goToStore(${i})">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:40px;height:40px;background:${color}20;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">🏪</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;color:var(--text-1);">${s.name}</div>
+          <div style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);">${s.id} · ${s.region}</div>
+        </div>
+        <span class="t-badge" style="background:${color}20;color:${color};font-weight:700;">${statusText}</span>
+      </div>
+      <div class="health-bar" style="height:6px;">
+        <div class="health-bar-fill" style="width:${h}%;background:${color}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;">
+        <span style="font-size:11px;color:var(--text-3);">Health Score</span>
+        <span style="font-size:11px;font-family:var(--font-mono);color:${color};font-weight:700;">${h}%</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderVendorTracker() {
+  const vendors = [
+    { name: 'Blue Star', status: 'AMC Active', statusClass: 'due-ok', meta: 'Cold rooms + ACs · Last visit: 3 weeks ago · Next: This week' },
+    { name: 'Domino\'s Gas Vendor', status: 'Contract Active', statusClass: 'due-ok', meta: 'LPG supply · Refill due: 8 days' },
+    { name: 'Hikvision Service', status: 'On Call', statusClass: 'due-soon', meta: 'CCTV · Call for fault only · No AMC' },
+    { name: 'UPS Vendor', status: 'Battery Due', statusClass: 'due-overdue', meta: 'Battery replacement overdue · Contact now' },
+    { name: 'Pest Control', status: 'Visit Due', statusClass: 'due-soon', meta: '15-day cycle · Last visit: 12 days ago' },
+    { name: 'Fire Safety', status: 'Expiry Soon', statusClass: 'due-soon', meta: 'Extinguisher refill · Huma Mall: 18 days' },
+  ];
+  const cont = document.getElementById('vendor-tracker');
+  cont.innerHTML = vendors.map(v =>
+    `<div class="vendor-item">
+      <div class="vi-header">
+        <span class="vi-name">${v.name}</span>
+        <span class="vi-status ${v.statusClass}">${v.status}</span>
+      </div>
+      <div class="vi-meta">${v.meta}</div>
+    </div>`
+  ).join('');
+}
+
+// ============================================================
+// LEARNING
+// ============================================================
+function renderLearnModules() {
+  const list = document.getElementById('learn-list');
+  list.innerHTML = LEARN_MODULES.map((m, i) =>
+    `<div class="learn-module" onclick="openLearnModule(${i})">
+      <div class="lm-header">
+        <span class="lm-icon">${m.icon}</span>
+        <div>
+          <div class="lm-title">${m.title}</div>
+          <div class="lm-topics-count">${m.topics.length} topics · ${m.progress}% complete</div>
+        </div>
+      </div>
+      <div class="lm-progress-wrap">
+        <div class="lm-bar"><div class="lm-bar-fill" style="width:${m.progress}%"></div></div>
+        <div class="lm-pct">${m.progress}%</div>
+      </div>
+      <div class="lm-chips">
+        ${m.topics.map(t => `<span class="lm-chip">${t}</span>`).join('')}
+      </div>
+    </div>`
+  ).join('');
+}
+
+function openLearnModule(i) {
+  const m = LEARN_MODULES[i];
+  openModal(`${m.icon} ${m.title}`,
+    `<div style="margin-bottom:14px;">
+      <div class="lm-bar" style="height:6px;"><div class="lm-bar-fill" style="width:${m.progress}%"></div></div>
+      <div class="lm-pct">${m.progress}% complete</div>
+    </div>
+    <div style="font-size:13px;color:var(--text-1);line-height:1.8;">${m.content}</div>
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="btn-primary" onclick="closeModal();showToast('📚 Module marked as reviewed!')">✅ Mark Reviewed</button>
+    </div>`
+  );
+}
+
+// ============================================================
+// QUICK NOTES
+// ============================================================
+function loadNotes() {
+  try {
+    const n = localStorage.getItem('smp_notes');
+    if (n) document.getElementById('quick-notes').value = n;
+  } catch(e) {}
+}
+
+function saveNotes() {
+  try {
+    localStorage.setItem('smp_notes', document.getElementById('quick-notes').value);
+  } catch(e) {}
+}
+
+function copyNotes() {
+  const t = document.getElementById('quick-notes').value;
+  if (!t) return showToast('⚠️ Notes empty');
+  navigator.clipboard.writeText(t).then(() => showToast('📋 Copied!'));
+}
+
+function shareNotes() {
+  const t = document.getElementById('quick-notes').value;
+  if (!t) return showToast('⚠️ Notes empty');
+  const store = STORES[state.activeStore].name;
+  const header = `*Field Notes — ${store}*\n${new Date().toLocaleString('en-IN')}\n\n`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(header + t), '_blank');
+}
+
+// ============================================================
+// REPORT GENERATOR
+// ============================================================
+function generateChecklistReport() {
+  const store = STORES[state.activeStore];
+  let ok = [], fail = [], obs = [], vendor = [], crit = [];
+
+  CHECKLIST_CATEGORIES.forEach(cat => {
+    cat.items.forEach(item => {
+      const v = state.checklistData[getCheckKey(store.id, item.id)];
+      if (v === 'ok') ok.push(`${cat.icon} ${item.name}`);
+      else if (v === 'fail') fail.push(`${cat.icon} ${item.name}`);
+      else if (v === 'obs') obs.push(`${cat.icon} ${item.name}`);
+      else if (v === 'vendor') vendor.push(`${cat.icon} ${item.name}`);
+      else if (v === 'crit') crit.push(`${cat.icon} ${item.name}`);
+    });
+  });
+
+  let report = `*🏪 Maintenance Report*\n`;
+  report += `*Store:* ${store.name} (${store.id})\n`;
+  report += `*Date:* ${new Date().toLocaleString('en-IN')}\n`;
+  report += `*Technician:* Amir Khan · Sr. Electrician · DPI West 1\n\n`;
+
+  if (crit.length) report += `*🚨 CRITICAL (${crit.length}):*\n${crit.map(i=>`• ${i}`).join('\n')}\n\n`;
+  if (fail.length) report += `*❌ Not Working (${fail.length}):*\n${fail.map(i=>`• ${i}`).join('\n')}\n\n`;
+  if (vendor.length) report += `*🔧 Vendor Needed (${vendor.length}):*\n${vendor.map(i=>`• ${i}`).join('\n')}\n\n`;
+  if (obs.length) report += `*⚠️ Observations (${obs.length}):*\n${obs.map(i=>`• ${i}`).join('\n')}\n\n`;
+  if (ok.length) report += `*✅ Working OK (${ok.length}):*\n${ok.map(i=>`• ${i}`).join('\n')}\n\n`;
+  report += `_Sent via Store Maintenance Pro_`;
+
+  openModal('📤 WhatsApp Report',
+    `<div style="font-size:12px;color:var(--text-2);margin-bottom:12px;">Report ready for ${store.name}</div>
+    <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:var(--text-1);white-space:pre-wrap;max-height:250px;overflow-y:auto;font-family:var(--font-mono);line-height:1.6;">${report}</div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-primary" onclick="window.open('https://wa.me/?text='+encodeURIComponent(${JSON.stringify(report)}),'_blank')">📤 Send on WhatsApp</button>
+      <button class="btn-secondary" onclick="navigator.clipboard.writeText(${JSON.stringify(report)}).then(()=>showToast('Copied!'))">📋 Copy</button>
+    </div>`
+  );
+}
+
+// ============================================================
+// QUICK BREAKDOWN / NOTIFICATIONS
+// ============================================================
+function quickBreakdown() {
+  openModal('⚡ Log Breakdown',
+    `<div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:8px;">Store</div>
+      <select style="width:100%;background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text-1);font-size:13px;outline:none;" id="bd-store-sel">
+        ${STORES.map((s,i) => `<option value="${i}" ${i===state.activeStore?'selected':''}>${s.name}</option>`).join('')}
+      </select>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:8px;">Equipment / Issue</div>
+      <input style="width:100%;background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text-1);font-size:13px;outline:none;" placeholder="e.g. PS540G conveyor not moving" id="bd-equip">
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:8px;">Priority</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-secondary" id="pri-low" onclick="selectPri('low')" style="flex:1;font-size:12px;">🟡 Low</button>
+        <button class="btn-secondary" id="pri-med" onclick="selectPri('med')" style="flex:1;font-size:12px;">🟠 Medium</button>
+        <button class="btn-primary" id="pri-crit" onclick="selectPri('crit')" style="flex:1;font-size:12px;">🔴 Critical</button>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:8px;">Description</div>
+      <textarea class="notes-area" style="min-height:80px;" placeholder="Describe the fault, what you observed..." id="bd-desc"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-primary" style="flex:1;" onclick="submitBreakdown()">📥 Log Breakdown</button>
+    </div>`
+  );
+}
+
+let selectedPri = 'med';
+function selectPri(p) { selectedPri = p; showToast('Priority: ' + p); }
+
+function submitBreakdown() {
+  const equip = document.getElementById('bd-equip')?.value;
+  if (!equip) { showToast('⚠️ Equipment/issue enter karo'); return; }
+  const storeIdx = parseInt(document.getElementById('bd-store-sel')?.value || 0);
+  const store = STORES[storeIdx];
+  const desc = document.getElementById('bd-desc')?.value || '';
+  const now = new Date().toLocaleString('en-IN');
+
+  const key = 'bd_' + Date.now();
+  state.checklistData[key] = { store: store.id, equip, desc, pri: selectedPri, time: now };
+  saveToStorage();
+  closeModal();
+  showToast('✅ Breakdown logged!');
+  document.getElementById('kpi-breakdown').textContent =
+    parseInt(document.getElementById('kpi-breakdown').textContent) + 1;
+}
+
+function shareBreakdown(i) {
+  const f = FAULT_LIBRARY[i];
+  let text = `*Breakdown Troubleshooting*\n`;
+  text += `*Equipment:* ${f.eq}\n*Fault:* ${f.title}\n\n`;
+  text += `*Steps:*\n` + f.steps.map((s, idx) => `${idx+1}. ${s}`).join('\n');
+  text += `\n\n_Sent via Store Maintenance Pro_`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function openNotifications() {
+  openModal('🔔 Alerts & Reminders',
+    `<div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--red);">🚨 CRITICAL</div>
+        <div style="font-size:13px;color:var(--text-1);margin-top:4px;">Cold Room Fan Motor — DPI64519</div>
+        <div style="font-size:11px;color:var(--text-3);">Blue Star ticket open · Escalate to AM</div>
+      </div>
+      <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--amber);">⚠️ DUE TODAY</div>
+        <div style="font-size:13px;color:var(--text-1);margin-top:4px;">Pest Control — Fly catcher glue board change</div>
+        <div style="font-size:11px;color:var(--text-3);">15-day cycle completed</div>
+      </div>
+      <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--amber);">⚠️ OVERDUE</div>
+        <div style="font-size:13px;color:var(--text-1);margin-top:4px;">UPS Battery Test — All stores</div>
+        <div style="font-size:11px;color:var(--text-3);">Weekly PM missed last week</div>
+      </div>
+      <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--green);">✅ GOOD</div>
+        <div style="font-size:13px;color:var(--text-1);margin-top:4px;">Huma Mall — All checks current</div>
+        <div style="font-size:11px;color:var(--text-3);">Health score: 95%</div>
+      </div>
+    </div>`
+  );
+}
+
+function openQuickAdd() {
+  openModal('⚡ Quick Actions',
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      ${[
+        ['📋','Log Checklist', "closeModal();navTo('checklist')"],
+        ['🔍','Report Breakdown', "closeModal();quickBreakdown()"],
+        ['📤','Send Report', "closeModal();navTo('checklist')"],
+        ['📅','PMS Due List', "closeModal();navTo('pms')"],
+        ['🏪','Switch Store', "closeModal();navTo('stores')"],
+        ['📚','Learn Module', "closeModal();navTo('learn')"],
+      ].map(([ic, lbl, fn]) =>
+        `<div onclick="${fn}" style="background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center;">
+          <div style="font-size:24px;margin-bottom:6px;">${ic}</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-1);">${lbl}</div>
+        </div>`
+      ).join('')}
+    </div>`
+  );
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(title, content) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-content').innerHTML = content;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ============================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+document.addEventListener('DOMContentLoaded', init);
+setInterval(renderDashDate, 60000);
+</script>
+</body>
+</html>
